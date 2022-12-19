@@ -25,6 +25,20 @@ public:
     }
 };
 
+vec f (double a, double b, double c, double d, double e, vec v) { //уравнение Лагранжа
+    return vec((e*sin(v.t)-2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/a*v.x*v.x+v.y*v.y)-b*d/2/a*sin(v.p)*cos(v.t-v.p))/(2*c-b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/a), (d*sin(v.p)+2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/c*v.y*v.y+v.x*v.x)-b*e/2/c*sin(v.t)*cos(v.t-v.p))/(2*a-b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/c), v.y, v.x);
+}
+
+vec RKstep (double a, double b, double c, double d, double e, vec start) { //метод Рунге-Кутты 4ого порядка
+    vec k1, k2, k3, k4; 
+    const double stepsize = 0.0005; //временной шаг
+    k1 = f(a, b, c, d, e, start);
+    k2 = f(a, b, c, d, e, start+k1*(0.5)*stepsize);
+    k3 = f(a, b, c, d, e, start+k2*(0.5)*stepsize);
+    k4 = f(a, b, c, d, e, start+k3*stepsize);
+    return start+(k1+k2*2+k3*2+k4)*(double(1)/double(6))*stepsize;
+}
+
 class CApp {
 private:
   bool Running;
