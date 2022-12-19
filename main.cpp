@@ -1,5 +1,5 @@
 #include <iostream>
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 #include <cmath>
 #include <vector>
 #define pi acos(-1)
@@ -39,18 +39,33 @@ vec RKstep (double a, double b, double c, double d, double e, vec start) { //м�
     return start+(k1+k2*2+k3*2+k4)*(double(1)/double(6))*stepsize;
 }
 
+void drawMaya(SDL_Renderer* renderer, vec data, int xpos, int ypos, double L, double l, double SCALE) {  //создание 2 палочек маятника
+    SDL_RenderDrawLine(renderer, xpos, ypos, xpos+L*SCALE*sin(data.p), ypos+L*SCALE*cos(data.p));   // первая палочка (верхняя) - первые 2 координаты - начало, вторые две - конец
+    SDL_RenderDrawLine(renderer, xpos+L*SCALE*sin(data.p), ypos+L*SCALE*cos(data.p), xpos+L*SCALE*sin(data.p)+l*SCALE*sin(data.t), ypos+L*SCALE*cos(data.p)+l*SCALE*cos(data.t)); //вторая палочка (нижняя)
+}
+
 class CApp {
 private:
   bool Running;
   SDL_Surface* surface; //cтруктура содержащая набор используемых пикселей 
   SDL_Window* window; //структура которая содержит всю информацию о самом окне: размер, положение, полноэкранный режим, границы и т. д.
   SDL_Renderer* renderer; //рендеринговая структура
-  double L, l, M, m;
+    vec data;
+  double L, l, M, m, a, b, c, d, e;
 public:
   CApp(double L, double l, double M, double m): L(L), l(l), M(M), m(m) {
     Running = true;
     window = NULL;
     renderer = NULL;
+    a = M*L*L/6+m*L*L/2; //константы для уравнения Лагранжа
+    b = m*l*L/4;
+    c = m*l*l/6;
+    d = (M/2+m)*g*L;
+    e = m*g*l/2;
+  }
+    
+    void setData(vec d) {
+        data = d;
   }
 
     bool OnInit()
@@ -74,6 +89,10 @@ public:
     void OnLoop() {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE); //устанавливает цвет используемый для операций рисования
         SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 148, 0, 29, SDL_ALPHA_OPAQUE);
+        drawMaya(renderer, data, WIDTH/2, HEIGHT/2, L, l, SCALE);
+        for (int i=1; i<10; i++) {
+        data = RKstep(a,b,c,d,e,data);};
         SDL_RenderPresent(renderer);
         SDL_Delay(1000/TPS);
     }
@@ -102,6 +121,7 @@ int main(int argv, char** args) {
     double L, l, M, m; //вводим константы маятника (массы и длины стержней), длина верхней палочки L, нижней l, аналогично массы
     L=1.5; l=1; m=1; M=1;
     CApp a(L, l, M, m); //создаём элемент класса CApp
+    a.setData(vec(0, 0, -pi/2, -pi/3));
     a.OnExecute();
     return 0;
 }
