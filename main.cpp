@@ -1,9 +1,29 @@
 #include <iostream>
 #include "SDL2/SDL.h"
+#include <cmath>
+#include <vector>
+#define pi acos(-1)
 
 using namespace std;
 
 const int WIDTH = 800, HEIGHT = 600, TPS=60;
+double SCALE = 120, g = -9.81;
+
+class vec { //класс, описывающий положение системы в пространстве
+public:
+    double x, y, p, t;
+    vec(double x, double y, double p, double t): x(x), y(y), p(p), t(t){}
+    vec(): x(0), y(0), p(0), t(0){}
+    vec operator + (const vec &s) {return vec(x+s.x, y+s.y, p+s.p, t+s.t);} //делаем замену операторов для класса vec
+    vec operator * (double c) {return vec(c*x, c*y, c*p, c*t);}
+    vec operator= (const vec &s) {
+        x = s.x;
+        y = s.y;
+        p = s.p; //угол, между осью Y и палкой L
+        t = s.t; //угол между осью Y и палкой l
+        return *this;
+    }
+};
 
 class CApp {
 private:
