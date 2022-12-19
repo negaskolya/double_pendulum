@@ -32,4 +32,4 @@ ____
 
 <h3 align="center">Визуализация</h3>
 
-![гифка](https://user-images.githubusercontent.com/91532824/208429572-cfdab04a-c52d-4ff2-aa27-6caf16e2ae63.gif)
+                             ![гифка](https://user-images.githubusercontent.com/91532824/208429572-cfdab04a-c52d-4ff2-aa27-6caf16e2ae63.gif)
