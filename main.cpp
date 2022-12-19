@@ -70,8 +70,8 @@ public:
 
     bool OnInit()
     {
-        SDL_Init(SDL_INIT_EVERYTHING); //инициализирует библиотеку SDL и все её подсистемы
-        window = SDL_CreateWindow("Mayatnic", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 0); //параметры окна
+        SDL_Init(SDL_INIT_EVERYTHING); //инициализирует библиотеку SDL и все её подсистемы (видео, аудио и т.д)
+        window = SDL_CreateWindow("Mayatnic", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 0); //создание окна
         renderer = SDL_CreateRenderer(window, -1, 0); //2d рендиринг для окна window
         // Проверяет что окно было успешно создано
         if (window == NULL) {
@@ -83,13 +83,13 @@ public:
     }
 
     void OnEvent(SDL_Event* Event) {
-        if (Event->type == SDL_QUIT) Running = false; 
+        if (Event->type == SDL_QUIT) Running = false; //проверка на нажатие крестика в рамке окна
     }
 
     void OnLoop() {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE); //устанавливает цвет используемый для операций рисования
-        SDL_RenderClear(renderer);
-        SDL_SetRenderDrawColor(renderer, 148, 0, 29, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE); //устанавливает цвет используемый для операций рисования квадрата
+        SDL_RenderClear(renderer); // чистим экран от нарисованных ранее текстур
+        SDL_SetRenderDrawColor(renderer, 148, 0, 29, SDL_ALPHA_OPAQUE); 
         drawMaya(renderer, data, WIDTH/2, HEIGHT/2, L, l, SCALE);
         for (int i=1; i<10; i++) {
         data = RKstep(a,b,c,d,e,data);};
@@ -103,16 +103,16 @@ public:
         SDL_Quit(); //отключает все инициализированные подсистемы
     }
 
-    int OnExecute() {
-    if(OnInit() == false) return -1;
-    SDL_Event Event;
+    int OnExecute() {  //основная функция, обрабатывающая события на экране
+    if(OnInit() == false) return -1; //проверка, есть ли окно
+    SDL_Event Event; //создание объекта класса SDL_Event
         while(Running) {
-            while(SDL_PollEvent(&Event)) {
+            while(SDL_PollEvent(&Event)) { //проверка, что в очереди есть события
                 OnEvent(&Event);
             }
             OnLoop();
         }
-    OnCleanup();
+    OnCleanup(); // в случае нажатия крестика всё закрывает
     return 0;
   }
 };
