@@ -4,10 +4,6 @@
 #include <vector>
 #define pi acos(-1)
 
-using namespace std;
-
-const int WIDTH = 800, HEIGHT = 600, TPS=60;
-double SCALE = 120, g = -9.81;
 
 class vec { //класс, описывающий положение системы в пространстве
 public:
@@ -16,7 +12,7 @@ public:
     vec(): x(0), y(0), p(0), t(0){}
     vec operator + (const vec &s) {return vec(x+s.x, y+s.y, p+s.p, t+s.t);} // делаем замену операторов для класса vec
     vec operator * (double c) {return vec(c*x, c*y, c*p, c*t);}
-    vec operator= (const vec &s) {
+    vec operator = (const vec &s) {
         x = s.x;      // угловая скорость вращения палочки l
         y = s.y;      // угловая скорость вращения палочки L
         p = s.p;      // угол, между осью Y и палкой L
@@ -25,8 +21,16 @@ public:
     }
 };
 
+vec operator*(double c, const vec &s) {
+    return vec(c*s.x, c*s.y, c*s.p, c*s.t);
+}   
+
+
 vec f (double a, double b, double c, double d, double e, vec v) { // динамические уравнения Эйлера
-    return vec((e*sin(v.t)-2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/a*v.x*v.x+v.y*v.y)-b*d/2/a*sin(v.p)*cos(v.t-v.p))/(2*c-b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/a), (d*sin(v.p)+2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/c*v.y*v.y+v.x*v.x)-b*e/2/c*sin(v.t)*cos(v.t-v.p))/(2*a-b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/c), v.y, v.x);
+    return vec((e*sin(v.t) - 2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/a*v.x*v.x + v.y*v.y) - b*d/2/a*sin(v.p)*cos(v.t-v.p))/(2*c - b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/a),
+               (d*sin(v.p) + 2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/c*v.y*v.y + v.x*v.x) - b*e/2/c*sin(v.t)*cos(v.t-v.p))/(2*a - b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/c), 
+               v.y,
+               v.x);
 }
 
 vec RKstep (double a, double b, double c, double d, double e, vec start) {    // метод Рунге-Кутты 4ого порядка
@@ -46,22 +50,25 @@ void drawMaya(SDL_Renderer* renderer, vec data, int xpos, int ypos, double L, do
 
 class CApp {
 private:
-  bool Running;
-  SDL_Surface* surface;    // cтруктура содержащая набор используемых пикселей 
-  SDL_Window* window;      // структура которая содержит всю информацию о самом окне: размер, положение, полноэкранный режим, границы и т. д.
-  SDL_Renderer* renderer;  // рендеринговая структура
+    bool Running;
+    SDL_Surface* surface;    // cтруктура содержащая набор используемых пикселей 
+    SDL_Window* window;      // структура которая содержит всю информацию о самом окне: размер, положение, полноэкранный режим, границы и т. д.
+    SDL_Renderer* renderer;  // рендеринговая структура
     vec data;
-  double L, l, M, m, a, b, c, d, e;
+    const int TPS = 60;
+    const int WIDTH = 800, HEIGHT = 600;
+    double SCALE = 120, g = -9.81;
+    double L, l, M, m, a, b, c, d, e;
 public:
-  CApp(double L, double l, double M, double m): L(L), l(l), M(M), m(m) {
-    Running = true;
-    window = NULL;
-    renderer = NULL;
-    a = M*L*L/6+m*L*L/2;    // константы для уравнений Эйлера
-    b = m*l*L/4;
-    c = m*l*l/6;
-    d = (M/2+m)*g*L;
-    e = m*g*l/2;
+    CApp(double L, double l, double M, double m): L(L), l(l), M(M), m(m) {
+        Running = true;
+        window = NULL;
+        renderer = NULL;
+        a = M*L*L/6 + m*L*L/2;    // константы для уравнений Эйлера
+        b = m*l*L/4;
+        c = m*l*l/6;
+        d = (M/2+m)*g*L;
+        e = m*g*l/2;
   }
     
     void setData(vec d) {
@@ -87,12 +94,13 @@ public:
     }
 
     void OnLoop() { //меняет положения палочек на экране (графически), пересчитывает углы и угловые скорости
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);   // устанавливает цвет используемый для операций рисования квадрата
+        SDL_SetRenderDrawColor(renderer, 100, 100, 100, SDL_ALPHA_OPAQUE);   // устанавливает цвет используемый для операций рисования квадрата
         SDL_RenderClear(renderer);   // чистим экран от нарисованных ранее текстур
-        SDL_SetRenderDrawColor(renderer, 148, 0, 29, SDL_ALPHA_OPAQUE); 
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE); 
         drawMaya(renderer, data, WIDTH/2, HEIGHT/2, L, l, SCALE);
         for (int i=1; i<10; i++) {
-        data = RKstep(a,b,c,d,e,data);};
+            data = RKstep(a,b,c,d,e,data);
+        }
         SDL_RenderPresent(renderer);
         SDL_Delay(1000/TPS);
     }
@@ -104,23 +112,24 @@ public:
     }
 
     int OnExecute() {    // основная функция, обрабатывающая события на экране
-    if(OnInit() == false) return -1;   // проверка, есть ли окно
-    SDL_Event Event;     // создание объекта класса SDL_Event
+        if(OnInit() == false) return -1;   // проверка, есть ли окно
+        SDL_Event Event;     // создание объекта класса SDL_Event
         while(Running) {
             while(SDL_PollEvent(&Event)) {   // проверка, что в очереди есть события
                 OnEvent(&Event);
             }
             OnLoop();
         }
-    OnCleanup(); // в случае нажатия крестика всё закрывает
-    return 0;
+        OnCleanup(); // в случае нажатия крестика всё закрывает
+        return 0;
   }
 };
 
-int main(int argv, char** args) {
+int main() {
     double L = 1.5, l = 1, M = 1, m = 1;   // вводим константы маятника (массы и длины стержней), длина верхней палочки L, нижней l, аналогично массы
     CApp a(L, l, M, m);   // создаём элемент класса CApp
     a.setData(vec(0, 0, -pi/2, -pi/3)); // задаём начальные условия системы
     a.OnExecute();
     return 0;
 }
+
