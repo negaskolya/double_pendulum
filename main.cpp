@@ -1,34 +1,32 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <cmath>
-#include <vector>
 #define pi acos(-1)
 
 
 class vec { //класс, описывающий положение системы в пространстве
-public:
+private:
     double x, y, p, t;
+public:
     vec(double x, double y, double p, double t): x(x), y(y), p(p), t(t){}
     vec(): x(0), y(0), p(0), t(0){}
     vec operator + (const vec &s) {return vec(x+s.x, y+s.y, p+s.p, t+s.t);} // делаем замену операторов для класса vec
     vec operator * (double c) {return vec(c*x, c*y, c*p, c*t);}
-    vec operator = (const vec &s) {
-        x = s.x;      // угловая скорость вращения палочки l
-        y = s.y;      // угловая скорость вращения палочки L
-        p = s.p;      // угол, между осью Y и палкой L
-        t = s.t;      // угол между осью Y и палкой l
-        return *this;
-    }
+    friend vec operator*(double c, const vec &s);
+    friend vec f(double a, double b, double c, double d, double e, vec v);
+    friend vec RKstep (double a, double b, double c, double d, double e, vec start);
+    friend void drawMaya(SDL_Renderer* renderer, vec data, int xpos, int ypos, double L, double l, double SCALE);
 };
 
 vec operator*(double c, const vec &s) {
     return vec(c*s.x, c*s.y, c*s.p, c*s.t);
-}   
-
+}
 
 vec f (double a, double b, double c, double d, double e, vec v) { // динамические уравнения Эйлера
-    return vec((e*sin(v.t) - 2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/a*v.x*v.x + v.y*v.y) - b*d/2/a*sin(v.p)*cos(v.t-v.p))/(2*c - b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/a),
-               (d*sin(v.p) + 2*b*sin(v.t-v.p)*(cos(v.t-v.p)*b/2/c*v.y*v.y + v.x*v.x) - b*e/2/c*sin(v.t)*cos(v.t-v.p))/(2*a - b*b*cos(v.t-v.p)*cos(v.t-v.p)/2/c), 
+    double A = b*b*cos(v.t-v.p)*cos(v.t-v.p)/2;
+    double B = 2*b*sin(v.t-v.p)*cos(v.t-v.p)*b/2;
+    return vec((e*sin(v.t) - B/a*v.x*v.x - 2*b*sin(v.t-v.p)*v.y*v.y - b*d/2/a*sin(v.p)*cos(v.t-v.p))/(2*c - A/a), 
+               (d*sin(v.p) + B/c*v.y*v.y + 2*b*sin(v.t-v.p)*v.x*v.x - b*e/2/c*sin(v.t)*cos(v.t-v.p))/(2*a - A/c), 
                v.y,
                v.x);
 }
@@ -40,12 +38,14 @@ vec RKstep (double a, double b, double c, double d, double e, vec start) {    //
     k2 = f(a, b, c, d, e, start+k1*(0.5)*stepsize);
     k3 = f(a, b, c, d, e, start+k2*(0.5)*stepsize);
     k4 = f(a, b, c, d, e, start+k3*stepsize);
-    return start+(k1+k2*2+k3*2+k4)*(double(1)/double(6))*stepsize; // пересчёт нового значения параметров системы
+    return start+(k1+k2*2+k3*2+k4)*(double(1)/double(6))*stepsize; // пересчёт нового значения параметров системы ********
 }
 
 void drawMaya(SDL_Renderer* renderer, vec data, int xpos, int ypos, double L, double l, double SCALE) {    // создание 2 палочек маятника
-    SDL_RenderDrawLine(renderer, xpos, ypos, xpos+L*SCALE*sin(data.p), ypos+L*SCALE*cos(data.p));          // первая палочка (верхняя) - первые 2 координаты - начало, вторые две - конец
-    SDL_RenderDrawLine(renderer, xpos+L*SCALE*sin(data.p), ypos+L*SCALE*cos(data.p), xpos+L*SCALE*sin(data.p)+l*SCALE*sin(data.t), ypos+L*SCALE*cos(data.p)+l*SCALE*cos(data.t)); //вторая палочка (нижняя)
+    // первая палочка (верхняя) - первые 2 координаты - начало, вторые две - конец
+    SDL_RenderDrawLine(renderer, xpos, ypos, xpos+L*SCALE*sin(data.p), ypos+L*SCALE*cos(data.p));  
+    //вторая палочка (нижняя)        
+    SDL_RenderDrawLine(renderer, xpos+L*SCALE*sin(data.p), ypos+L*SCALE*cos(data.p), xpos+L*SCALE*sin(data.p)+l*SCALE*sin(data.t), ypos+L*SCALE*cos(data.p)+l*SCALE*cos(data.t)); 
 }
 
 class CApp {
@@ -122,7 +122,7 @@ public:
         }
         OnCleanup(); // в случае нажатия крестика всё закрывает
         return 0;
-  }
+    }
 };
 
 int main() {
