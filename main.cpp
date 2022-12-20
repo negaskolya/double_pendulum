@@ -68,7 +68,7 @@ public:
         data = d;
   }
 
-    bool OnInit()
+    bool OnInit() //инициализация всего всего и создание окна
     {
         SDL_Init(SDL_INIT_EVERYTHING);   // инициализирует библиотеку SDL и все её подсистемы (видео, аудио и т.д)
         window = SDL_CreateWindow("Mayatnic", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 0);    // создание окна
@@ -86,7 +86,7 @@ public:
         if (Event->type == SDL_QUIT) Running = false; //проверка на нажатие крестика в рамке окна
     }
 
-    void OnLoop() {
+    void OnLoop() { //меняет положения палочек на экране (графически), пересчитывает углы и угловые скорости
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);   // устанавливает цвет используемый для операций рисования квадрата
         SDL_RenderClear(renderer);   // чистим экран от нарисованных ранее текстур
         SDL_SetRenderDrawColor(renderer, 148, 0, 29, SDL_ALPHA_OPAQUE); 
@@ -98,7 +98,7 @@ public:
     }
     
 
-    void OnCleanup() {
+    void OnCleanup() { //функция для завершения выполнения
         SDL_DestroyWindow(window);  // закрывает окно
         SDL_Quit();   // отключает все инициализированные подсистемы
     }
